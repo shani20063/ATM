@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATM Simulator</title>
+    <style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #c5bdbd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+
+.atm {
+    background-color: #333;
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    text-align: center;
+}
+.atm:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+    transition: all 0.3s ease-in-out;
+}
+button {
+    margin-top: 10px;
+    padding: 10px;
+    width: 100%;
+    background-color: #0066cc;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #00509e;
+}
+
+input {
+    margin-top: 10px;
+    padding: 10px;
+    width: 100%;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+#pin{
+    margin-left:-10px;
+    width: 80%;
+    outline: none;
+}
+  </style>
+</head>
+<body>
+    <div class="atm">
+        <h2>ATM Work</h2>
+        <div id="screen">
+            <p id="message">Welcome! Please enter your PIN:</p>
+            <input type="password"placeholder="May Password:1234" id="pin" maxlength="4">
+            <button onclick="enterPIN()">Enter</button>
+        </div>
+        <div id="actions" style="display: none;">
+            <button onclick="withdraw()">Withdraw</button>
+            <button onclick="deposit()">Deposit</button>
+            <button onclick="checkBalance()">Check Balance</button>
+            <button onclick="changePIN()">Change PIN</button>
+            <button onclick="logout()">Logout</button>
+        </div>
+        <div id="transaction" style="display: none;">
+            <input type="number" id="amount" placeholder="Enter amount">
+            <button onclick="processTransaction()">Submit</button>
+        </div>
+    </div>
+
+    <script>
+  let balance = 10000;
+let pin = '1234';  // Default PIN
+let sessionActive = false;
+let pinAttempts = 0;
+let isLocked = false;
+
+function enterPIN() {
+    if (isLocked) {
+        alert('Your account is locked. Please try again later.');
+        return;
+    }
+
+    const inputPIN = document.getElementById('pin').value;
+    if (inputPIN === pin) {
+        document.getElementById('screen').style.display = 'none';
+        document.getElementById('actions').style.display = 'block';
+        sessionActive = true;
+        pinAttempts = 0;  // Reset the attempts on successful login
+    } else {
+        pinAttempts++;
+        if (pinAttempts >= 3) {
+            isLocked = true;
+            alert('Account locked due to multiple incorrect PIN attempts. Try again after 30 seconds.');
+            setTimeout(() => {
+                isLocked = false;
+                pinAttempts = 0;
+            }, 30000);  // Lock for 30 seconds
+        } else {
+            alert(`Incorrect PIN! You have ${3 - pinAttempts} attempts left.`);
+        }
+    }
+}
+
+function withdraw() {
+    if (!sessionActive) return;
+    document.getElementById('transaction').style.display = 'block';
+    document.getElementById('message').textContent = 'Enter amount to withdraw (Max 10000):';
+    document.getElementById('actions').style.display = 'none';
+}
+
+function deposit() {
+    if (!sessionActive) return;
+    document.getElementById('transaction').style.display = 'block';
+    document.getElementById('message').textContent = 'Enter amount to deposit:';
+    document.getElementById('actions').style.display = 'none';
+}
+function checkBalance() {
+    if (!sessionActive) return;
+    alert(`Your current balance is: ₹${balance}`);
+}
+
+function changePIN() {
+    if (!sessionActive) return;
+    const newPIN = prompt('Enter new PIN:');
+    if (newPIN && newPIN.length === 4) {
+        pin = newPIN;
+        alert('PIN changed successfully!');
+    } else {
+        alert('Invalid PIN! Please enter a 4-digit number.');
+    }
+}
+
+function processTransaction() {
+    const amount = parseInt(document.getElementById('amount').value);
+    const message = document.getElementById('message').textContent;
+
+    if (message.includes('withdraw')) {
+        if (amount > balance) {
+            alert('Insufficient balance!');
+        } else if (amount > 10000) {
+            alert('Withdrawal limit exceeded! Max limit is 10000.');
+        } else {
+            balance -= amount;
+            alert(`Withdrawal successful! New balance: ${balance}`);
+        }
+    } else if (message.includes('deposit')) {
+        balance += amount;
+        alert(`Deposit successful! New balance: ${balance}`);
+    }
+
+    document.getElementById('transaction').style.display = 'none';
+    document.getElementById('actions').style.display = 'block';
+}
+
+
+function logout() {
+    sessionActive = false;
+    document.getElementById('actions').style.display = 'none';
+    document.getElementById('screen').style.display = 'block';
+    document.getElementById('pin').value = '';
+    document.getElementById('message').textContent = 'Welcome! Please enter your PIN:';
+}
+  </script>
+</body>
+</html>
+    
